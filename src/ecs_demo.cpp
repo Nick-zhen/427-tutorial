@@ -16,7 +16,7 @@ public:
 
 	// TODO: implement create_entity
     Entity create_entity() {
-        return Entity();
+        
     }
 };
 
@@ -27,8 +27,7 @@ int main(int argc, char* argv[])
 
     // TODO: Create a salmon entity that can swim with speed 3 
     // by using registry.create_entity() and registry.swims.insert(...);
-    Entity salmon = registry.create_entity();
-    registry.swims.insert(salmon);
+    registry.create_entity();
 
 	// TODO: Always create debugging output to check correctness, e.g.
     printf("Salmon can swim?: %d\n", 0 /*TODO: check registry.swims.has(salmon)*/);
