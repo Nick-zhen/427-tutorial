@@ -58,6 +58,7 @@ public:
         if (has(e))
         {
             map_entity_componentID.erase(e);
+            // TODO: remove the component that associated with the entity
         }
     };
 
