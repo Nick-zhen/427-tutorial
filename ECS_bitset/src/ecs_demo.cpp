@@ -58,6 +58,7 @@ public:
 
     // Checks if entity e has a component
     bool has(Entity e, ComponentIndex index) {
+        // TODO: return false if entity maps to an index outside the component array:
         return hasComponent[e - 1] & (UINT64_C(1) << index);
     }
 
@@ -78,6 +79,8 @@ public:
         hasComponent[cID] |= (UINT64_C(1) << index);
         return dest;
     }
+
+    // TODO: Gets component at correct index in component array
 };
 
 // Tests
@@ -121,6 +124,7 @@ int main(int argc, char* argv[])
 
     // Change the swim speed of the existing salmon to 5 more than previous speed
     printf("\n");
+    // We need to use reference variable like Swims&
     Swims salmonSwim = registry.swims[salmon - 1];
     printf("Salmon old swim speed: %f\n", salmonSwim.swim_speed);
 
