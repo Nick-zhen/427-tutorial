@@ -58,7 +58,8 @@ public:
 
     // Checks if entity e has a component
     bool has(Entity e, ComponentIndex index) {
-        // TODO: return false if entity maps to an index outside the component array:
+        // TODO: return false if entity maps to an index outside the hasComponent array:
+        // It did not check if Entity e is greater than MAX_ENTITY in has() function.
         return hasComponent[e - 1] & (UINT64_C(1) << index);
     }
 
