@@ -167,6 +167,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
 	if (registry.softShells.components.size() <= MAX_FISH && next_fish_spawn < 0.f) {
 		// !!!  TODO A1: Create new fish with createFish({0,0}), as for the Turtles above
+		// Reset timer
+		next_fish_spawn = (FISH_DELAY_MS / 2) + uniform_dist(rng) * (FISH_DELAY_MS / 2);
+		// Create fish
+		Entity entity = createFish(renderer, {0,0});
+		// Setting random initial position and constant velocity
+		Motion& motion = registry.motions.get(entity);
+		motion.position =
+			vec2(window_width_px -200.f,
+				 50.f + uniform_dist(rng) * (window_height_px - 100.f));
+		motion.velocity = vec2(-100.f, 0.f);
 	}
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -293,6 +303,26 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	Motion& motion = registry.motions.get(player_salmon);
+		
+	if (action == GLFW_PRESS) {
+        printf("Key pressed: %d\n",key);
+		if (key == GLFW_KEY_LEFT) {
+			motion.position.x -= 50;
+		} else if (key == GLFW_KEY_UP) {
+			motion.position.y -= 50;
+		} else if (key == GLFW_KEY_RIGHT) {
+			motion.position.x += 50;
+		} else if (key == GLFW_KEY_DOWN) {
+			motion.position.y += 50;
+		}
+    } else if (action == GLFW_RELEASE) {
+		printf("Key released: %d\n",key);
+    } else if (action == GLFW_REPEAT) {
+		printf("Key repeated: %d\n",key);
+    }
+	
+	
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
