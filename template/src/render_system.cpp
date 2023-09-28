@@ -12,11 +12,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	// specification for more info Incrementally updates transformation matrix,
 	// thus ORDER IS IMPORTANT
 	Transform transform;
-	transform.translate(motion.position);
-	transform.scale(motion.scale);
+
 	// !!! TODO A1: add rotation to the chain of transformations, mind the order
 	// of transformations
 
+	// SRT order. I changed the matrix mutiplication order in common.cpp
+	transform.scale(motion.scale);
+	transform.rotate(motion.angle);
+	transform.translate(motion.position);
+	
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest &render_request = registry.renderRequests.get(entity);
 

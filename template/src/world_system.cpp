@@ -176,7 +176,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		motion.position =
 			vec2(window_width_px -200.f,
 				 50.f + uniform_dist(rng) * (window_height_px - 100.f));
-		motion.velocity = vec2(-100.f, 0.f);
+		motion.velocity = vec2(-200.f, 0.f);
 	}
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -306,24 +306,29 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	Motion& motion = registry.motions.get(player_salmon);
 		
 	if (action == GLFW_PRESS) {
-        printf("Key pressed: %d\n",key);
 		if (key == GLFW_KEY_LEFT) {
-			motion.position.x -= 50;
+			motion.velocity.x -= 200.f;
 		} else if (key == GLFW_KEY_UP) {
-			motion.position.y -= 50;
+			motion.velocity.y += 100.f;
 		} else if (key == GLFW_KEY_RIGHT) {
-			motion.position.x += 50;
+			motion.velocity.x += 200.f;
 		} else if (key == GLFW_KEY_DOWN) {
-			motion.position.y += 50;
+			motion.velocity.y -= 100.f;
 		}
     } else if (action == GLFW_RELEASE) {
-		printf("Key released: %d\n",key);
+		if (key == GLFW_KEY_LEFT) {
+			motion.velocity.x += 200.f;
+		} else if (key == GLFW_KEY_UP) {
+			motion.velocity.y -= 100.f;
+		} else if (key == GLFW_KEY_RIGHT) {
+			motion.velocity.x -= 200.f;
+		} else if (key == GLFW_KEY_DOWN) {
+			motion.velocity.y += 100.f;
+		}
     } else if (action == GLFW_REPEAT) {
-		printf("Key repeated: %d\n",key);
+		// currently I do not need it. Might be used in the future
     }
 	
-	
-
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;
@@ -358,6 +363,12 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// xpos and ypos are relative to the top-left of the window, the salmon's
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	
+	Motion& salmon_motion = registry.motions.get(player_salmon);
+
+	float x_value = mouse_position.x - salmon_motion.position.x;
+	float y_value = mouse_position.y - salmon_motion.position.y;
+	salmon_motion.angle = atan2(y_value, x_value);
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }

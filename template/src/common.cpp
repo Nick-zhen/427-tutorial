@@ -4,7 +4,8 @@
 void Transform::scale(vec2 scale)
 {
 	mat3 S = { { scale.x, 0.f, 0.f },{ 0.f, scale.y, 0.f },{ 0.f, 0.f, 1.f } };
-	mat = mat * S;
+	// mat = mat * S;
+	mat = S * mat;
 }
 
 void Transform::rotate(float radians)
@@ -12,13 +13,15 @@ void Transform::rotate(float radians)
 	float c = cosf(radians);
 	float s = sinf(radians);
 	mat3 R = { { c, s, 0.f },{ -s, c, 0.f },{ 0.f, 0.f, 1.f } };
-	mat = mat * R;
+	// mat = mat * R;
+	mat = R * mat;
 }
 
 void Transform::translate(vec2 offset)
 {
 	mat3 T = { { 1.f, 0.f, 0.f },{ 0.f, 1.f, 0.f },{ offset.x, offset.y, 1.f } };
-	mat = mat * T;
+	// mat = mat * T;
+	mat = T * mat;
 }
 
 bool gl_has_errors()
