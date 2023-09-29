@@ -9,6 +9,7 @@ const float FISH_BB_WIDTH = 0.4f * 296.f;
 const float FISH_BB_HEIGHT = 0.4f * 165.f;
 const float TURTLE_BB_WIDTH = 0.4f * 300.f;
 const float TURTLE_BB_HEIGHT = 0.4f * 202.f;
+const float PI = 3.14159265358979323;
 
 // the player
 Entity createSalmon(RenderSystem* renderer, vec2 pos);

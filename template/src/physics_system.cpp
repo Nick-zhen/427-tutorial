@@ -1,7 +1,6 @@
 // internal
 #include "physics_system.hpp"
 #include "world_init.hpp"
-const float PI = 3.14159265358979323;
 
 // Returns the local bounding coordinates scaled by the current size of the entity
 vec2 get_bounding_box(const Motion& motion)

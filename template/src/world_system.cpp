@@ -271,6 +271,9 @@ void WorldSystem::handle_collisions() {
 					Mix_PlayChannel(-1, salmon_dead_sound, 0);
 
 					// !!! TODO A1: change the salmon orientation and color on death
+					Motion& motion = registry.motions.get(entity);
+					motion.angle = -PI;
+					motion.velocity = (vec2) {0.f, 100.f};
 				}
 			}
 			// Checking Player - SoftShell collisions
@@ -303,31 +306,34 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	Motion& motion = registry.motions.get(player_salmon);
+
+	if (!registry.deathTimers.has(player_salmon)) {
+		Motion& motion = registry.motions.get(player_salmon);
 		
-	if (action == GLFW_PRESS) {
-		if (key == GLFW_KEY_LEFT) {
-			motion.velocity.x -= 200.f;
-		} else if (key == GLFW_KEY_UP) {
-			motion.velocity.y += 100.f;
-		} else if (key == GLFW_KEY_RIGHT) {
-			motion.velocity.x += 200.f;
-		} else if (key == GLFW_KEY_DOWN) {
-			motion.velocity.y -= 100.f;
+		if (action == GLFW_PRESS) {
+			if (key == GLFW_KEY_LEFT) {
+				motion.velocity.x -= 200.f;
+			} else if (key == GLFW_KEY_UP) {
+				motion.velocity.y += 100.f;
+			} else if (key == GLFW_KEY_RIGHT) {
+				motion.velocity.x += 200.f;
+			} else if (key == GLFW_KEY_DOWN) {
+				motion.velocity.y -= 100.f;
+			}
+		} else if (action == GLFW_RELEASE) {
+			if (key == GLFW_KEY_LEFT) {
+				motion.velocity.x += 200.f;
+			} else if (key == GLFW_KEY_UP) {
+				motion.velocity.y -= 100.f;
+			} else if (key == GLFW_KEY_RIGHT) {
+				motion.velocity.x -= 200.f;
+			} else if (key == GLFW_KEY_DOWN) {
+				motion.velocity.y += 100.f;
+			}
+		} else if (action == GLFW_REPEAT) {
+			// currently I do not need it. Might be used in the future
 		}
-    } else if (action == GLFW_RELEASE) {
-		if (key == GLFW_KEY_LEFT) {
-			motion.velocity.x += 200.f;
-		} else if (key == GLFW_KEY_UP) {
-			motion.velocity.y -= 100.f;
-		} else if (key == GLFW_KEY_RIGHT) {
-			motion.velocity.x -= 200.f;
-		} else if (key == GLFW_KEY_DOWN) {
-			motion.velocity.y += 100.f;
-		}
-    } else if (action == GLFW_REPEAT) {
-		// currently I do not need it. Might be used in the future
-    }
+	}
 	
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
@@ -364,11 +370,12 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
-	Motion& salmon_motion = registry.motions.get(player_salmon);
+	if (!registry.deathTimers.has(player_salmon)) {
+		Motion& salmon_motion = registry.motions.get(player_salmon);
 
-	float x_value = mouse_position.x - salmon_motion.position.x;
-	float y_value = mouse_position.y - salmon_motion.position.y;
-	salmon_motion.angle = atan2(y_value, x_value);
-
+		float x_value = mouse_position.x - salmon_motion.position.x;
+		float y_value = mouse_position.y - salmon_motion.position.y;
+		salmon_motion.angle = atan2(y_value, x_value);
+	}
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
