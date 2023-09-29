@@ -30,6 +30,11 @@ struct Motion {
 	vec2 scale = { 10.f, 10.f };
 };
 
+struct LightUp
+{
+	float timer_ms = 500.f;
+};
+
 // Stucture to store collision information
 struct Collision
 {

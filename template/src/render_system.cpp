@@ -95,6 +95,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 			// !!! TODO A1: set the light_up shader variable using glUniform1i,
 			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
+			 
+			const int light_up_value = registry.lightUpTimers.has(entity) ? 1 : 0;
+			glUniform1i(light_up_uloc, (int)light_up_value);
 			gl_has_errors();
 		}
 	}

@@ -209,6 +209,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 
 	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death timer
+	for (Entity entity : registry.lightUpTimers.entities) {
+		// progress timer
+		LightUp& timer = registry.lightUpTimers.get(entity);
+		timer.timer_ms -= elapsed_ms_since_last_update;
+
+		// delete timer once the lightup timer expired
+		if (timer.timer_ms < 0) {
+			registry.lightUpTimers.remove(entity);
+		}
+	}
 
 	return true;
 }
@@ -274,6 +284,10 @@ void WorldSystem::handle_collisions() {
 					Motion& motion = registry.motions.get(entity);
 					motion.angle = -PI;
 					motion.velocity = (vec2) {0.f, 100.f};
+
+					// change color to red
+					vec3& salmon_color = registry.colors.get(entity);
+					salmon_color = {1, 0.f, 0.f};
 				}
 			}
 			// Checking Player - SoftShell collisions
@@ -284,7 +298,9 @@ void WorldSystem::handle_collisions() {
 					Mix_PlayChannel(-1, salmon_eat_sound, 0);
 					++points;
 
-					// !!! TODO A1: create a new struct called LightUp in components.hpp and add an instance to the salmon entity by modifying the ECS registry
+					// !!! TODO A1: create a new struct called LightUp in components.hpp and 
+					// add an instance to the salmon entity by modifying the ECS registry
+					registry.lightUpTimers.emplace(entity);
 				}
 			}
 		}
