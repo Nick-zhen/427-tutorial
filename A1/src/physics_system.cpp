@@ -34,10 +34,21 @@ void PhysicsSystem::step(float elapsed_ms)
 	for(uint i = 0; i < motion_container.size(); i++)
 	{
 		// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
-		//Motion& motion = motion_container.components[i];
-		//Entity entity = motion_container.entities[i];
-		//float step_seconds = elapsed_ms / 1000.f;
-		(void)elapsed_ms; // placeholder to silence unused warning until implemented
+		Motion& motion = motion_container.components[i];
+		// Entity entity = motion_container.entities[i];
+		float step_seconds = elapsed_ms / 1000.f;
+		// (void)elapsed_ms; // placeholder to silence unused warning until implemented
+
+		// decompose the x velocity
+		float cos_x_mov = cos(motion.angle) * motion.velocity.x;
+		float sin_x_mov = sin(motion.angle) * motion.velocity.x;
+		motion.position.x += cos_x_mov * step_seconds;
+		motion.position.y += sin_x_mov * step_seconds;
+		// decompose the y velocity
+		float cos_y_mov = cos(motion.angle - PI/2) * motion.velocity.y;
+		float sin_y_mov = sin(motion.angle - PI/2) * motion.velocity.y;
+		motion.position.x += cos_y_mov * step_seconds;  
+		motion.position.y += sin_y_mov * step_seconds;
 	}
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

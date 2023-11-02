@@ -167,6 +167,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
 	if (registry.softShells.components.size() <= MAX_FISH && next_fish_spawn < 0.f) {
 		// !!!  TODO A1: Create new fish with createFish({0,0}), as for the Turtles above
+		// Reset timer
+		next_fish_spawn = (FISH_DELAY_MS / 2) + uniform_dist(rng) * (FISH_DELAY_MS / 2);
+		// Create fish
+		Entity entity = createFish(renderer, {0,0});
+		// Setting random initial position and constant velocity
+		Motion& motion = registry.motions.get(entity);
+		motion.position =
+			vec2(window_width_px -200.f,
+				 50.f + uniform_dist(rng) * (window_height_px - 100.f));
+		motion.velocity = vec2(-200.f, 0.f);
 	}
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -199,6 +209,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	screen.screen_darken_factor = 1 - min_timer_ms / 3000;
 
 	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death timer
+	for (Entity entity : registry.lightUpTimers.entities) {
+		// progress timer
+		LightUp& timer = registry.lightUpTimers.get(entity);
+		timer.timer_ms -= elapsed_ms_since_last_update;
+
+		// delete timer once the lightup timer expired
+		if (timer.timer_ms < 0) {
+			registry.lightUpTimers.remove(entity);
+		}
+	}
 
 	return true;
 }
@@ -261,6 +281,13 @@ void WorldSystem::handle_collisions() {
 					Mix_PlayChannel(-1, salmon_dead_sound, 0);
 
 					// !!! TODO A1: change the salmon orientation and color on death
+					Motion& motion = registry.motions.get(entity);
+					motion.angle = -PI;
+					motion.velocity = (vec2) {0.f, 100.f};
+
+					// change color to red
+					vec3& salmon_color = registry.colors.get(entity);
+					salmon_color = {1, 0.f, 0.f};
 				}
 			}
 			// Checking Player - SoftShell collisions
@@ -271,7 +298,9 @@ void WorldSystem::handle_collisions() {
 					Mix_PlayChannel(-1, salmon_eat_sound, 0);
 					++points;
 
-					// !!! TODO A1: create a new struct called LightUp in components.hpp and add an instance to the salmon entity by modifying the ECS registry
+					// !!! TODO A1: create a new struct called LightUp in components.hpp and 
+					// add an instance to the salmon entity by modifying the ECS registry
+					registry.lightUpTimers.emplace(entity);
 				}
 			}
 		}
@@ -294,6 +323,34 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+	if (!registry.deathTimers.has(player_salmon)) {
+		Motion& motion = registry.motions.get(player_salmon);
+		
+		if (action == GLFW_PRESS) {
+			if (key == GLFW_KEY_LEFT) {
+				motion.velocity.x -= 200.f;
+			} else if (key == GLFW_KEY_UP) {
+				motion.velocity.y += 100.f;
+			} else if (key == GLFW_KEY_RIGHT) {
+				motion.velocity.x += 200.f;
+			} else if (key == GLFW_KEY_DOWN) {
+				motion.velocity.y -= 100.f;
+			}
+		} else if (action == GLFW_RELEASE) {
+			if (key == GLFW_KEY_LEFT) {
+				motion.velocity.x += 200.f;
+			} else if (key == GLFW_KEY_UP) {
+				motion.velocity.y -= 100.f;
+			} else if (key == GLFW_KEY_RIGHT) {
+				motion.velocity.x -= 200.f;
+			} else if (key == GLFW_KEY_DOWN) {
+				motion.velocity.y += 100.f;
+			}
+		} else if (action == GLFW_REPEAT) {
+			// currently I do not need it. Might be used in the future
+		}
+	}
+	
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;
@@ -328,6 +385,13 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// xpos and ypos are relative to the top-left of the window, the salmon's
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	
+	if (!registry.deathTimers.has(player_salmon)) {
+		Motion& salmon_motion = registry.motions.get(player_salmon);
 
+		float x_value = mouse_position.x - salmon_motion.position.x;
+		float y_value = mouse_position.y - salmon_motion.position.y;
+		salmon_motion.angle = atan2(y_value, x_value);
+	}
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }

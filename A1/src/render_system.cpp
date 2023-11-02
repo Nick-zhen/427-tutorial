@@ -12,11 +12,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	// specification for more info Incrementally updates transformation matrix,
 	// thus ORDER IS IMPORTANT
 	Transform transform;
-	transform.translate(motion.position);
-	transform.scale(motion.scale);
+
 	// !!! TODO A1: add rotation to the chain of transformations, mind the order
 	// of transformations
 
+	// SRT order. I changed the matrix mutiplication order in common.cpp
+	transform.scale(motion.scale);
+	transform.rotate(motion.angle);
+	transform.translate(motion.position);
+	
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest &render_request = registry.renderRequests.get(entity);
 
@@ -91,6 +95,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 			// !!! TODO A1: set the light_up shader variable using glUniform1i,
 			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
+			 
+			const int light_up_value = registry.lightUpTimers.has(entity) ? 1 : 0;
+			glUniform1i(light_up_uloc, (int)light_up_value);
 			gl_has_errors();
 		}
 	}
