@@ -30,6 +30,14 @@ struct Motion {
 	vec2 scale = { 10.f, 10.f };
 };
 
+struct Pebble {
+
+};
+
+struct Physic {
+	float mass = 0.f;
+};
+
 struct LightUp
 {
 	float timer_ms = 500.f;
