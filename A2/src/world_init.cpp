@@ -76,6 +76,9 @@ Entity createTurtle(RenderSystem* renderer, vec2 position)
 
 	// Create and (empty) Turtle component to be able to refer to all turtles
 	registry.hardShells.emplace(entity);
+	Physic& ph = registry.physics.emplace(entity);
+	ph.mass = 3000.f;
+
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TURTLE,
@@ -119,7 +122,10 @@ Entity createPebble(vec2 pos, vec2 size)
 	motion.scale = size;
 
 	// Create and (empty) Salmon component to be able to refer to all turtles
-	registry.hardShells.emplace(entity);
+	registry.pebbles.emplace(entity);
+	Physic& ph = registry.physics.emplace(entity);
+	ph.mass = size[0] * 10;
+
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed

@@ -13,12 +13,14 @@ const size_t MAX_TURTLES = 15;
 const size_t MAX_FISH = 5;
 const size_t TURTLE_DELAY_MS = 2000 * 3;
 const size_t FISH_DELAY_MS = 5000 * 3;
+const size_t PEBBLE_DELAY_MS = 200 * 3;
 
 // Create the fish world
 WorldSystem::WorldSystem()
 	: points(0)
 	, next_turtle_spawn(0.f)
-	, next_fish_spawn(0.f) {
+	, next_fish_spawn(0.f) 
+	, next_pebble_spawn(0.f) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -142,8 +144,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// (the containers exchange the last element with the current)
 	for (int i = (int)motion_container.components.size()-1; i>=0; --i) {
 	    Motion& motion = motion_container.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f) {
-			if(!registry.players.has(motion_container.entities[i])) // don't remove the player
+		if ((motion.position.x + abs(motion.scale.x) < 0.f) || (motion.position.x - abs(motion.scale.x) > 1200.f)) {
+			if(!registry.players.has(motion_container.entities[i]) ) // don't remove the player
 				registry.remove_all_components_of(motion_container.entities[i]);
 		}
 	}
@@ -183,6 +185,34 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// TODO A2: HANDLE PEBBLE SPAWN HERE
 	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	// Spawning new pebbles
+	next_pebble_spawn -= elapsed_ms_since_last_update * current_speed;
+	if (next_pebble_spawn < 0.f) {
+		// Reset timer
+		next_pebble_spawn = (PEBBLE_DELAY_MS / 2) + uniform_dist(rng) * (PEBBLE_DELAY_MS / 2);
+
+		// create pebble
+		Motion& player_salmon_motion = registry.motions.get(player_salmon);
+		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
+		Entity pebble = createPebble(player_salmon_motion.position, { radius, radius });
+		float brightness = uniform_dist(rng) * 0.5 + 0.5;
+		registry.colors.insert(pebble, { brightness, brightness, brightness});
+
+		// set motion 
+		Motion& motion = registry.motions.get(pebble);
+		float rand_angle = player_salmon_motion.angle + (uniform_dist(rng) * 0.6 - 0.3f);
+		// float rand_angle = player_salmon_motion.angle;
+
+		float rand_vel_x = 200.f + (uniform_dist(rng) - 0.5f) * 100;
+
+		// decompose the x velocity
+		float cos_x_vel = cos(rand_angle) * rand_vel_x;
+		float sin_x_vel = sin(rand_angle) * rand_vel_x;
+		motion.velocity.x = cos_x_vel;
+		motion.velocity.y = sin_x_vel;
+	}
+
 
 	// Processing the salmon state
 	assert(registry.screenStates.components.size() <= 1);
@@ -246,17 +276,19 @@ void WorldSystem::restart_game() {
 
 	// !! TODO A2: Enable static pebbles on the ground, for reference
 	// Create pebbles on the floor, use this for reference
-	/*
-	for (uint i = 0; i < 20; i++) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
-		Entity pebble = createPebble({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 }, 
-			         { radius, radius });
-		float brightness = uniform_dist(rng) * 0.5 + 0.5;
-		registry.colors.insert(pebble, { brightness, brightness, brightness});
-	}
-	*/
+	
+	// for (uint i = 0; i < 20; i++) {
+	// 	int w, h;
+	// 	glfwGetWindowSize(window, &w, &h);
+	// 	float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
+	// 	Entity pebble = createPebble({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 }, 
+	// 		         { radius, radius });
+	// 	float brightness = uniform_dist(rng) * 0.5 + 0.5;
+	// 	registry.colors.insert(pebble, { brightness, brightness, brightness});
+	// }
+	
+	// Entity line = createLine({250, 150}, {100, 100});
+	// registry.colors.insert(line, {1, 0.8f, 0.8f});
 }
 
 // Compute collisions between entities
@@ -283,7 +315,7 @@ void WorldSystem::handle_collisions() {
 					// !!! TODO A1: change the salmon orientation and color on death
 					Motion& motion = registry.motions.get(entity);
 					motion.angle = -PI;
-					motion.velocity = (vec2) {0.f, 100.f};
+					motion.velocity = (vec2) {0.f, -100.f};
 
 					// change color to red
 					vec3& salmon_color = registry.colors.get(entity);
@@ -330,25 +362,26 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			if (key == GLFW_KEY_LEFT) {
 				motion.velocity.x -= 200.f;
 			} else if (key == GLFW_KEY_UP) {
-				motion.velocity.y += 100.f;
+				motion.velocity.y -= 100.f;
 			} else if (key == GLFW_KEY_RIGHT) {
 				motion.velocity.x += 200.f;
 			} else if (key == GLFW_KEY_DOWN) {
-				motion.velocity.y -= 100.f;
+				motion.velocity.y += 100.f;
 			}
 		} else if (action == GLFW_RELEASE) {
 			if (key == GLFW_KEY_LEFT) {
 				motion.velocity.x += 200.f;
 			} else if (key == GLFW_KEY_UP) {
-				motion.velocity.y -= 100.f;
+				motion.velocity.y += 100.f;
 			} else if (key == GLFW_KEY_RIGHT) {
 				motion.velocity.x -= 200.f;
 			} else if (key == GLFW_KEY_DOWN) {
-				motion.velocity.y += 100.f;
+				motion.velocity.y -= 100.f;
 			}
 		} else if (action == GLFW_REPEAT) {
 			// currently I do not need it. Might be used in the future
 		}
+		// printf("pos: %f\n", motion.position.x);
 	}
 	
 	// Resetting game
